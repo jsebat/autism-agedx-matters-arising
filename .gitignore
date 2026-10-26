@@ -1,0 +1,19 @@
+# never commit data, results or manuscript files
+*.tsv
+*.csv
+*.parquet
+*.xlsx
+*.txt
+*.gz
+*.bed
+*.bim
+*.fam
+*.pgen
+*.psam
+*.pvar
+*.png
+*.pdf
+*.docx
+*.html
+__pycache__/
+*.bak*

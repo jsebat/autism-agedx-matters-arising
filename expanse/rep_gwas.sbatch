@@ -1,0 +1,22 @@
+#!/bin/bash
+#SBATCH -A ddp195
+#SBATCH -p ind-shared
+#SBATCH --qos=ind-shared-normal
+#SBATCH -N 1
+#SBATCH -n 1
+#SBATCH -c 16
+#SBATCH --mem=64G
+#SBATCH -t 08:00:00
+#SBATCH --array=1-3
+#SBATCH --job-name=rep_gwas
+#SBATCH -o /home/jsebat/rvh2/logs/rep_gwas_%A_%a.out
+# Replication step 3 per platform: GCTA fastGWA-mlm-binary (as in SPARK_replicationGWAS.R) for every split in pheno_names.txt.
+set -e
+SRCS=(spark_gsa_v1 spark_gsa_v2 spark_twist); export SRC=${SRCS[$((SLURM_ARRAY_TASK_ID-1))]}
+W=/expanse/projects/sebat1/jsebat/cnv_drift/warrier_rep/$SRC; cd $W; G=/expanse/projects/sebat1/jsebat/tools/gcta/gcta64
+/home/jsebat/micromamba/envs/dnmt3a-py/bin/python ~/rvh2/rep_pheno.py
+k=0; while read nm; do k=$((k+1))
+  $G --bfile hm3w --grm-sparse grm_sp --fastGWA-mlm-binary --pheno pheno.txt --mpheno $k --qcovar qcovar.txt --covar covar.txt --maf 0.01 --thread-num 16 --out fg_$nm > fg_$nm.stdout 2>&1 || echo "failed $nm"
+  grep -i -E "heritab|logistic|cases|controls" fg_$nm.log | head -4
+done < pheno_names.txt
+echo DONE
