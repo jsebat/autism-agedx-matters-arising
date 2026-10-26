@@ -38,7 +38,7 @@ No participant-level data, study identifiers or results are included.
 8. **Rare variants.** `build_trio_rare.py` (de novo / inherited × NDD / other genes, SNV/indel), then `rare_full.py` (split comparison) and `rare_between_full.py` (probands vs siblings, parental age).
 9. **Within-family transmission.** `ptdt_full.py`.
 10. **Factor analysis and figures.** `figures_and_analysis/`.
-11. **Simulation.** `sim_twofactor.py`: one autism liability plus a heritable stratifier of age at diagnosis, passed through a six-GWAS design like the original study's, with one- and two-factor models fitted by weighted least squares.
+11. **Simulation.** `sim_twofactor.py` and `sim_twofactor2.py` (direct splits, several stratifiers, ascertainment); figure `figures_and_analysis/sim_figure.py`. `sim_twofactor.py`: one autism liability plus a heritable stratifier of age at diagnosis, passed through a six-GWAS design like the original study's, with one- and two-factor models fitted by weighted least squares.
 
 Paths in the scripts point to the authors' cluster storage. Adapt them to your own copies of the inputs.
 
