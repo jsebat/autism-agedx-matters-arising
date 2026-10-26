@@ -30,7 +30,7 @@ No participant-level data, study identifiers or results are included.
    - Genomic factor analysis on the all-strata split GWAS: `gsem_fa_all.sbatch` (`gsem_fa_all.R`).
 5. **SNP heritability.** `greml.sbatch`, `greml_all.sbatch`, `greml_combine_all.py`.
 6. **Polygenic scores.** `full_probands.py` assembles scores for all subcohorts and records family structure. Autism scores follow the leave-one-out rule: `score_wgs2026_asd.sbatch`.
-7. **Canonical correlation analyses.**
+7. **Canonical correlation analyses.** Current version: `cca2.py` with the shared module `ccalib.py` (configurations in `cca2_configs.cfg`; `submit_cca2.sh` runs main fits, permutation and bootstrap chunks, then `cca2_combine.sbatch`). Evaluation is fully held out: nested family cross-validation with imputation, covariate adjustment and penalty choice inside the training folds; signed held-out correlations with axes matched across folds; Freedman-Lane family permutations with sequential tests for later axes; family bootstrap of the whole procedure, including paired fold differences between axes and single characteristics. The scripts below are the first version, kept for reference:
    - `cca_full.py`: polygenic scores; main sample, sensitivity subsets, within-family, power, missingness by family structure.
    - `cca_trio.py`: polygenic + rare variants.
    - `cca_ssc.py`: SSC replication.
@@ -38,6 +38,7 @@ No participant-level data, study identifiers or results are included.
 8. **Rare variants.** `build_trio_rare.py` (de novo / inherited × NDD / other genes, SNV/indel), then `rare_full.py` (split comparison) and `rare_between_full.py` (probands vs siblings, parental age).
 9. **Within-family transmission.** `ptdt_full.py`.
 10. **Factor analysis and figures.** `figures_and_analysis/`.
+11. **Simulation.** `sim_twofactor.py`: one autism liability plus a heritable stratifier of age at diagnosis, passed through a six-GWAS design like the original study's, with one- and two-factor models fitted by weighted least squares.
 
 Paths in the scripts point to the authors' cluster storage. Adapt them to your own copies of the inputs.
 

@@ -48,7 +48,7 @@ reg = pd.read_csv(f"{P}/spark_registration.tsv", sep="\t").drop_duplicates("subj
 pro["reg_age"] = pd.to_numeric(pro.sp.map(reg.age_at_registration_years), errors="coerce")
 pro["u22"] = pro.reg_age.lt(22) | pro.cohort.eq("ssc")
 pr("probands by cohort (all / registered before 22):"); pr(pro.groupby("cohort").agg(all=("sp", "size"), u22=("u22", "sum")).to_string())
-pro.to_parquet(f"{OUT}/rare_full_cases.parquet", index=False)
+if not os.environ.get("ADJ"): pro.to_parquet(f"{OUT}/rare_full_cases.parquet", index=False)   # sensitivity runs never rewrite the shared table
 a = pro[pro.u22].copy() if U22 else pro.copy()
 a = a[~a.cohort.eq("ssc")].reset_index(drop=True)   # splits need SPARK survey codes
 # ---- splits (as rare_compare.py), age-at-diagnosis thirds defined among SPARK autistic registrants of the same age criterion
@@ -62,11 +62,31 @@ SPL = {"age at diagnosis (top vs bottom third)": dx3, "age at diagnosis (>10 vs 
        "motor coordination problems (DCDQ)": sv.s20, "low Vineland ABC (bottom vs top third)": sv.s26, "SCQ (top vs bottom third)": sv.s23, "RBS-R (top vs bottom third)": sv.s24,
        "SRS (top vs bottom third)": sv.s25, "intellectual disability": sv.s13, "minimal language": sv.s15, "language regression": sv.s18,
        "early onset concern": sv.s19, "motor delay": sv.s21}
-fi = pd.factorize(a.cohort + "|" + a.family_key)[0]; nu = fi.max() + 1; Y = a[CATS].to_numpy(float)
+fi = pd.factorize(a.cohort + "|" + a.family_key)[0]; nu = fi.max() + 1; Y = a[CATS].to_numpy(float).copy()
 G = {nm: pd.to_numeric(a.sp.map(s), errors="coerce").to_numpy(float) for nm, s in SPL.items()}
+ADJ = os.environ.get("ADJ", ""); ADJ = "" if ADJ == "pooled" else ADJ   # "pooled" = original analysis without rewriting the shared table; review fix: "" pooled (original) | "cohort" within-cohort contrasts pooled | "cohort_parage" + burdens residualised on parental ages within cohort
+coh = a.cohort.astype(str).to_numpy(); COH = np.unique(coh)
+if ADJ == "cohort_parage":
+    env_ = pd.read_csv(f"{P}/spark_env.tsv", sep="\t").drop_duplicates("subject_sp_id").set_index("subject_sp_id")
+    pa = np.column_stack([pd.to_numeric(a.sp.map(env_[c]), errors="coerce").to_numpy(float) for c in ("maternal_age", "paternal_age")])
+    keep_pa = np.isfinite(pa).all(1)
+    for c_ in COH:
+        m = (coh == c_) & keep_pa & np.isfinite(Y).all(1); Zc = np.column_stack([np.ones(m.sum()), pa[m]])
+        Y[m] = Y[m] - Zc @ np.linalg.lstsq(Zc, Y[m], rcond=None)[0] + Y[m].mean(0)
+    Y[~keep_pa] = np.nan
+    TAG += "_parage"
+if ADJ: TAG += "_strat"
 def dvec(w, g):
-    ok = np.isfinite(g) & np.isfinite(Y).all(1); h, l = ok & (g == 1), ok & (g == 0)
-    return (Y[h] * w[h, None]).sum(0) / w[h].sum() - (Y[l] * w[l, None]).sum(0) / w[l].sum()
+    ok = np.isfinite(g) & np.isfinite(Y).all(1)
+    if not ADJ:
+        h, l = ok & (g == 1), ok & (g == 0)
+        return (Y[h] * w[h, None]).sum(0) / w[h].sum() - (Y[l] * w[l, None]).sum(0) / w[l].sum()
+    num, den = 0.0, 0.0   # within-cohort high-minus-low, weighted by the harmonic weight of the two (bootstrap-weighted) group sizes
+    for c_ in COH:
+        h, l = ok & (g == 1) & (coh == c_), ok & (g == 0) & (coh == c_); nh, nl = w[h].sum(), w[l].sum()
+        if nh < 5 or nl < 5: continue
+        d_ = (Y[h] * w[h, None]).sum(0) / nh - (Y[l] * w[l, None]).sum(0) / nl; wc = nh * nl / (nh + nl); num = num + wc * d_; den += wc
+    return num / den
 rng = np.random.default_rng(2026); B = 1000; ones = np.ones(len(a))
 WB = [np.bincount(rng.integers(0, nu, nu), minlength=nu)[fi].astype(float) for _ in range(B)]
 est = {nm: dvec(ones, g) for nm, g in G.items()}; boot = {nm: np.array([dvec(w, g) for w in WB]) for nm, g in G.items()}
@@ -78,7 +98,8 @@ for nm, g in G.items():
         **{f"d_{c}": v for c, v in zip(CATS, d)}, norm=float(np.linalg.norm(d)), wald_chi2_4df=wald, p_wald=float(chi2.sf(wald, 4)),
         wald_denovo_2df=wd, p_denovo=float(chi2.sf(wd, 2)), wald_inherited_2df=wi, p_inherited=float(chi2.sf(wi, 2)),
         delta_vs_age=float(np.linalg.norm(d) - np.linalg.norm(est[ref])), delta_lo95=float(np.percentile(db, 2.5)), delta_hi95=float(np.percentile(db, 97.5)),
-        p_delta=float(2 * min((db <= 0).mean(), (db >= 0).mean())) if nm != ref else np.nan))
+        p_delta=float(max(2 * min((db <= 0).mean(), (db >= 0).mean()), 1 / B)) if nm != ref else np.nan, p_delta_is_floor=bool(nm != ref and min((db <= 0).mean(), (db >= 0).mean()) == 0),
+        **{f"d_lo95_{c}": float(np.percentile(boot[nm][:, i], 2.5)) for i, c in enumerate(CATS)}, **{f"d_hi95_{c}": float(np.percentile(boot[nm][:, i], 97.5)) for i, c in enumerate(CATS)}))
 T = pd.DataFrame(rows); T.to_csv(f"{OUT}/rare_compare_full{TAG}.tsv", sep="\t", index=False)
 pr(f"\nsplit comparison ({'registered before 22' if U22 else 'all ages'}), SPARK trio probands n = {len(a)}")
 pd.set_option("display.width", 250); pr(T[["split", "n_high", "n_low", "wald_chi2_4df", "p_wald", "wald_inherited_2df", "wald_denovo_2df", "delta_vs_age", "p_delta"]].round(4).sort_values("wald_chi2_4df", ascending=False).to_string(index=False))

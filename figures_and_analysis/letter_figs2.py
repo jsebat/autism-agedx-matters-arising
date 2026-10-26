@@ -98,8 +98,7 @@ save(fig, "L_ED1")
 gm = pd.read_csv(os.path.join(R, "full_data", "greml_all.tsv"), sep="\t"); gm = gm[gm["sample"] == "all SPARK strata"].rename(columns={"h2": "h2_ivw", "se": "se_ivw"})   # all SPARK strata (greml_combine_all.py)
 gm["trait"] = gm.trait.map({"dx_age_u22": "age at diagnosis (registrants < 22 y; their sample restriction)", "late_dx": "diagnosed > 10 y vs < 6 y", "adi_pct": "area deprivation index percentile",
                             "adult_reg": "registered as adult", "adhd": "ADHD"}); gm = gm.dropna(subset=["trait"]).set_index("trait")
-lit = [("Townsend deprivation, UK Biobank", 0.21, 0.005, "PMID 27818178"), ("Household income, UK Biobank", 0.11, 0.007, "PMID 27818178"),
-       ("Research participation, UK Biobank", 0.125, np.nan, "PMID 37443256"), ("ADHD, PGC/iPSYCH", 0.14, 0.01, "PMID 36702997")]
+lit = [("ADHD, PGC/iPSYCH", 0.14, 0.01, "PMID 36702997")]   # review: background UKB examples (PMID 27818178, 37443256) removed with their references
 order = [("age at diagnosis (registrants < 22 y; their sample restriction)", "Age at diagnosis"), ("diagnosed > 10 y vs < 6 y", "Diagnosed > 10 y vs < 6 y"),
          ("area deprivation index percentile", "Area deprivation (ADI)"), ("registered as adult", "Registered as adult"), ("ADHD", "ADHD")]
 fig, a = plt.subplots(figsize=(4.8, 2.8)); ys = []
