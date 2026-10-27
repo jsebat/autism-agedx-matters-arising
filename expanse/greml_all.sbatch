@@ -7,14 +7,17 @@
 #SBATCH -c 16
 #SBATCH --mem=64G
 #SBATCH -t 06:00:00
-#SBATCH --array=1-2
+#SBATCH --array=1-5
 #SBATCH --job-name=greml
 #SBATCH -o /home/jsebat/rvh2/logs/greml_all_%A_%a.out
 # SNP heritability (GCTA-GREML, as the paper did for age at diagnosis) of each case characteristic, among unrelated autistic
-# participants per platform; dense GRM on HapMap3 SNPs (hm3w from rep_prep), --grm-cutoff 0.05; binary traits on the liability
-# scale with K = sample prevalence (--prevalence).
+# participants per SPARK stratum (one row per person across strata); dense GRM on HapMap3 SNPs (hm3w from rep_prep / allstrata_prep),
+# --grm-cutoff 0.05; binary traits on the liability scale with K = sample prevalence (--prevalence). Traits from greml_pheno_all.py.
+# Then greml_combine.sbatch (greml_combine_all.py) for the inverse-variance combination across strata.
+# (The array strata were originally fitted in two passes, the original six traits and later the four SES stratifiers; the inputs of
+# the two passes are identical, checked file by file.)
 set -e
-SRCS=(spark_wgs spark_wgs_2026_08); export SRC=${SRCS[$((SLURM_ARRAY_TASK_ID-1))]}
+SRCS=(spark_gsa_v1 spark_gsa_v2 spark_twist spark_wgs spark_wgs_2026_08); export SRC=${SRCS[$((SLURM_ARRAY_TASK_ID-1))]}
 W=/expanse/projects/sebat1/jsebat/cnv_drift/warrier_rep/$SRC; cd $W; G=/expanse/projects/sebat1/jsebat/tools/gcta/gcta64
 /home/jsebat/micromamba/envs/dnmt3a-py/bin/python ~/rvh2/greml_pheno_all.py
 [ -s grm_cases.grm.bin ] || $G --bfile hm3w --keep greml_keep.txt --maf 0.01 --make-grm --thread-num 16 --out grm_cases > /dev/null

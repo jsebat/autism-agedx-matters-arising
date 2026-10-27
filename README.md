@@ -53,7 +53,7 @@ Numbering follows the manuscript (items numbered by first mention in the main te
 | Supplementary Table 8 | Recording by family structure and its effect on the EDU/SES associations | manuscript builder | `cca2.py` (`MISSBIAS=1`) |
 | Supplementary Fig. 1 | Two factors from one autism liability (simulation) | `sim_figure.py` | `sim_twofactor.py`, `sim_twofactor2.py` |
 | Supplementary Fig. 2 | Fig. 1 restricted to the arrays (data available to Zhang et al.) | `letter_figs.py` (`DATA=arrays`) | `mgwas_prep.sbatch`, `rep_prep.sbatch`, `rep_pheno.py`, `survey_pheno.py`, `null_pheno.py`, `rep_gwas.sbatch`, `survey_run.sbatch`, `null_run.sbatch`, `rep_combine.py`, `rep_ldsc.sbatch`, `survey_ldsc.sbatch`, `null_ldsc.sbatch` |
-| Supplementary Fig. 3 | SNP heritability of the stratifiers among autistic participants | `letter_figs2.py` | `greml_pheno_all.py`, `greml.sbatch`, `greml_all.sbatch`, `greml_ses.sbatch`, `greml_combine_all.py` |
+| Supplementary Fig. 3 | SNP heritability of the stratifiers among autistic participants | `letter_figs2.py` | `greml_all.sbatch` (runs `greml_pheno_all.py`), `greml_combine.sbatch` (`greml_combine_all.py`) |
 | Supplementary Fig. 4 | What the split halves capture | `letter_figs2.py` | `all_ldsc.sbatch` (external-trait correlations), `gsem_fa_all.sbatch` (rotated factor solution) |
 | Supplementary Fig. 5 | Design differences between the age strata | `letter_figs2.py` | `agedx_strata.py`, `agedx_decomp.py`, `pcproj_eval.py` |
 
@@ -71,7 +71,7 @@ No copy-number variants are used anywhere in this analysis: every rare-variant r
    - Arrays only (replication of the paper's data): `rep_combine.py`, `rep_ldsc.sbatch`, `rep_rg.sbatch`, `survey_ldsc.sbatch`, `null_ldsc.sbatch`, `ext_rg.sbatch`, parsers.
    - All strata: `combine_all.py`, `all_ldsc.sbatch`, `all_parse.py`.
    - Genomic factor analysis on the all-strata split GWAS: `gsem_fa_all.sbatch` (`gsem_fa_all.R`).
-5. **SNP heritability.** `greml.sbatch`, `greml_all.sbatch`, `greml_combine_all.py`.
+5. **SNP heritability.** `greml_all.sbatch` (every SPARK stratum; traits from `greml_pheno_all.py`), then `greml_combine.sbatch` (`greml_combine_all.py`).
 6. **Polygenic scores.** `full_probands.py` assembles scores for all subcohorts and records family structure. Autism scores follow the leave-one-out rule: `score_wgs2026_asd.sbatch`.
 7. **Canonical correlation analyses.** Current version: `cca2.py` with the shared module `ccalib.py` (configurations in `cca2_configs.cfg`; `submit_cca2.sh` runs main fits, permutation and bootstrap chunks, then `cca2_combine.sbatch`). Evaluation is fully held out: nested family cross-validation with imputation, covariate adjustment and penalty choice inside the training folds; signed held-out correlations with axes matched across folds; Freedman-Lane family permutations with sequential tests for later axes; family bootstrap of the whole procedure, including paired fold differences between axes and single characteristics. `ANALYSIS=full` fits polygenic scores (main sample, sensitivity subsets, within-family, power, missingness by family structure), `ANALYSIS=trio` polygenic scores plus rare variants, `ANALYSIS=ssc` the SSC replication; unless `NOSINGLE=1`, a run also measures the strength of single characteristics, including age at diagnosis, on the same scale as the axes.
 8. **Rare variants.** `build_trio_rare.py` (de novo / inherited × NDD / other genes, SNV/indel), then `rare_full.py` (split comparison) and `rare_between_full.py` (probands vs siblings, parental age).
@@ -91,7 +91,7 @@ Paths in the scripts point to the authors' cluster storage. Adapt them to your o
 ## Software
 
 - GCTA 1.94.1 and PLINK 2.
-- LDSC (Python 3 port) and GenomicSEM.
+- LDSC (Python 3 port) and GenomicSEM 0.0.5 (R 4.5.2, lavaan 0.7.2; environment built by `expanse/inst_gsem.sh`).
 - SBayesRC.
 - Python 3.11: pandas, numpy, scipy, statsmodels, matplotlib.
 
