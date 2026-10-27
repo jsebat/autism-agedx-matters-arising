@@ -94,22 +94,16 @@ a.bar(range(len(v)), v.values, color=BLUE); a.axhline(1, color=MUTED, lw=0.5, ls
 a.set_xlabel("PC"); a.set_ylabel("SD projected / SD fitted"); a.set_ylim(0, 1.1); a.set_title("c  Projection shrinkage", loc="left", fontweight="bold", fontsize=7)
 save(fig, "L_ED1")
 
-# ---------- Extended Data Fig 2 ----------
-gm = pd.read_csv(os.path.join(R, "full_data", "greml_all.tsv"), sep="\t"); gm = gm[gm["sample"] == "all SPARK strata"].rename(columns={"h2": "h2_ivw", "se": "se_ivw"})   # all SPARK strata (greml_combine_all.py)
-gm["trait"] = gm.trait.map({"dx_age_u22": "age at diagnosis (registrants < 22 y; their sample restriction)", "late_dx": "diagnosed > 10 y vs < 6 y", "adi_pct": "area deprivation index percentile",
-                            "adult_reg": "registered as adult", "adhd": "ADHD"}); gm = gm.dropna(subset=["trait"]).set_index("trait")
-lit = [("ADHD, PGC/iPSYCH", 0.14, 0.01, "PMID 36702997")]   # review: background UKB examples (PMID 27818178, 37443256) removed with their references
-order = [("age at diagnosis (registrants < 22 y; their sample restriction)", "Age at diagnosis"), ("diagnosed > 10 y vs < 6 y", "Diagnosed > 10 y vs < 6 y"),
-         ("area deprivation index percentile", "Area deprivation (ADI)"), ("registered as adult", "Registered as adult"), ("ADHD", "ADHD")]
-fig, a = plt.subplots(figsize=(4.8, 2.8)); ys = []
-for i, (k, l) in enumerate(order):
-    y = len(order) + len(lit) + 1 - i
-    a.errorbar(gm.loc[k, "h2_ivw"], y, xerr=1.96 * gm.loc[k, "se_ivw"], fmt="o", color=ORANGE if "diagnos" in l.lower() else BLUE, ms=4, elinewidth=0.8)
-    ys.append((y, f"{l} (SPARK cases, n={int(gm.loc[k, 'n']):,})"))
-for i, (l, h, s, p) in enumerate(lit):
-    y = len(lit) - i; a.errorbar(h, y, xerr=1.96 * s if np.isfinite(s) else None, fmt="D", color=GREY, ms=3.5, elinewidth=0.8); ys.append((y, f"{l} ({p})"))
-a.set_yticks([y for y, _ in ys]); a.set_yticklabels([l for _, l in ys], fontsize=5.8); a.axvline(0, color=MUTED, lw=0.5)
-a.set_xlabel("SNP heritability (GCTA-GREML in SPARK; published estimates in grey)"); a.grid(axis="x", color=GRID, lw=0.4); a.set_axisbelow(True)
+# ---------- Supplementary Fig. 3: SNP heritability of the stratifiers named in the text (GCTA-GREML among autistic participants, all SPARK strata) ----------
+gm = pd.read_csv(os.path.join(R, "full_data", "greml_all.tsv"), sep="\t"); gm = gm[gm["sample"] == "all SPARK strata"].set_index("trait")
+order = [("dx_age_u22", "Age at diagnosis", ORANGE), ("late_dx", "Diagnosed > 10 y vs < 6 y", ORANGE), ("mother_nodeg", "Mother without degree", BLUE),
+         ("low_income", "Low household income (bottom vs top third)", BLUE), ("adi_pct", "Neighbourhood deprivation (ADI)", BLUE), ("mat_age", "Maternal age", BLUE),
+         ("pat_age", "Paternal age", BLUE), ("adhd", "ADHD", GREY)]
+fig, a = plt.subplots(figsize=(4.8, 2.9)); ys = []
+for i, (k, l, col) in enumerate(order):
+    y = len(order) - i; r = gm.loc[k]; a.errorbar(r.h2, y, xerr=1.96 * r.se, fmt="o", color=col, ms=4, elinewidth=0.8); ys.append((y, f"{l} (n={int(r.n):,})"))
+a.set_yticks([y for y, _ in ys]); a.set_yticklabels([l for _, l in ys], fontsize=6); a.axvline(0, color=MUTED, lw=0.5)
+a.set_xlabel("SNP heritability among autistic SPARK participants (GCTA-GREML, all strata)"); a.grid(axis="x", color=GRID, lw=0.4); a.set_axisbelow(True)
 save(fig, "L_ED2")
 
 # ---------- Extended Data Fig 3 (full data, registered before 22) ----------

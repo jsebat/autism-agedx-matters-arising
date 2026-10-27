@@ -6,7 +6,7 @@ import os, re
 import numpy as np, pandas as pd
 B = "/expanse/projects/sebat1/jsebat/cnv_drift/warrier_rep"; OUT = os.path.expanduser("~/rvh2/agedx")
 SRCS = ["spark_gsa_v1", "spark_gsa_v2", "spark_twist", "spark_wgs", "spark_wgs_2026_08"]
-TR = ["dx_age", "dx_age_u22", "adi_pct", "adult_reg", "adhd", "late_dx"]
+TR = ["dx_age", "dx_age_u22", "adi_pct", "adult_reg", "adhd", "late_dx", "mat_age", "pat_age", "low_income", "mother_nodeg"]
 def read(f):
     t = open(f).read(); est = {}
     for line in t.splitlines():

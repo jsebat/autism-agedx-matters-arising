@@ -25,6 +25,7 @@ else:
 reg = pd.read_csv(f"{R}/spark_registration.tsv", sep="\t").drop_duplicates("subject_sp_id").set_index("subject_sp_id")
 ho = pd.read_csv(f"{R}/spark_heldout.tsv", sep="\t").drop_duplicates("subject_sp_id").set_index("subject_sp_id")
 env = pd.read_csv(f"{R}/spark_env.tsv", sep="\t").drop_duplicates("subject_sp_id").set_index("subject_sp_id")
+sv = pd.read_csv(f"{R}/spark_survey.tsv", sep="\t").drop_duplicates("subject_sp_id").set_index("subject_sp_id")
 unrel = set(pd.read_csv(f"{M}/king.king.cutoff.in.id", sep="\t", dtype=str).iloc[:, 0])
 f = fam.copy(); f["asd"] = f.sp.map(reg.asd).astype(str).str.upper().eq("TRUE")
 f = f[f.asd & f.IID.isin(unrel)].copy()
@@ -32,12 +33,15 @@ dxm = pd.to_numeric(f.sp.map(reg.diagnosis_age), errors="coerce"); areg = pd.to_
 z = lambda v: (v - v.mean()) / v.std()
 T = {"dx_age": z(dxm / 12), "dx_age_u22": z((dxm / 12).where(areg < 22)), "adi_pct": z(pd.to_numeric(f.sp.map(env.adi_pct), errors="coerce")),
      "adult_reg": (areg >= 18).astype(float).where(areg.notna()), "adhd": pd.to_numeric(f.sp.map(ho.behav_adhd), errors="coerce"),
-     "late_dx": pd.Series(np.where(dxm > 120, 1.0, np.where(dxm < 72, 0.0, np.nan)), index=f.index)}
+     "late_dx": pd.Series(np.where(dxm > 120, 1.0, np.where(dxm < 72, 0.0, np.nan)), index=f.index),
+     # 2026-10-26: the SES stratifiers named in the text, defined as their split GWAS (spark_survey codes: s09 low vs high income third, s10 mother without degree)
+     "mat_age": z(pd.to_numeric(f.sp.map(env.maternal_age), errors="coerce")), "pat_age": z(pd.to_numeric(f.sp.map(env.paternal_age), errors="coerce")),
+     "low_income": pd.to_numeric(f.sp.map(sv.s09), errors="coerce"), "mother_nodeg": pd.to_numeric(f.sp.map(sv.s10), errors="coerce")}
 P = f[["FID", "IID"]].copy()
 for k, v in T.items(): P[k] = v.values
 P.fillna("NA").to_csv(f"{W}/greml_pheno.txt", sep=" ", index=False, header=False)
 open(f"{W}/greml_names.txt", "w").write("\n".join(T) + "\n")
-prev = {k: float(np.nanmean(v)) for k, v in T.items() if k in ("adult_reg", "adhd", "late_dx")}
+prev = {k: float(np.nanmean(v)) for k, v in T.items() if k in ("adult_reg", "adhd", "late_dx", "low_income", "mother_nodeg")}
 pd.Series(prev).to_csv(f"{W}/greml_prev.txt", sep="\t", header=False)
 f[["FID", "IID"]].to_csv(f"{W}/greml_keep.txt", sep=" ", index=False, header=False)
 pc = pd.read_csv(f"{W}/pcair.sscore", sep="\t"); ic = [c for c in pc.columns if "IID" in c][0]; pcs = [c for c in pc.columns if c.endswith("_AVG")][:10]
