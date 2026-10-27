@@ -4,11 +4,11 @@ classes, (d) common and rare variants on the same scale.
 (a) Each split as an arrow in external-genetics space (x psychiatric: mean rg with ADHD and MDD; y EDU/SES: mean rg with age at first birth and EA);
     Zhang F2 - F1 for comparison. Input results/axis_vectors.tsv.
 (b) Each split as an arrow in rare-variant space (probands, high/yes minus low/no): x de novo burden (De novo - NDD genes + De novo - other genes),
-    y inherited burden (Inherited - NDD genes + Inherited - other genes). Input results/rare_compare.tsv.
-(c) Wald chi-square (2 df) for the two inherited classes and, separately, the two de novo classes. Input results/rare_compare.tsv.
+    y inherited burden (Inherited - NDD genes + Inherited - other genes). Input results/full_data/rare_compare_full.tsv (rare_full.py).
+(c) Wald chi-square (2 df) for the two inherited classes and, separately, the two de novo classes. Same input.
 (d) Out-of-sample canonical correlation of each axis linking 35 characteristics of the same 7,072 probands to polygenic scores alone, rare variants alone,
     and both; axes matched to the combined analysis by the similarity of their characteristic loadings; age-at-diagnosis loading (combined) under each.
-    Inputs: results/cca_between{_pgs,_rare_common,}_{cv,structure}.tsv.
+    Inputs: results/full_data/cca_trio_{all,pgs,rare}_{cv,structure}.tsv (cca2.py, ANALYSIS=trio).
 Output: Manuscripts/Nature_LTE/figures/L_Fig2main.(png|pdf)"""
 import os
 import numpy as np, pandas as pd

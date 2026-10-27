@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Canonical correlation analyses for the Matters Arising, with fully held-out evaluation (ccalib.py). Replaces the evaluation part of cca_full.py,
-cca_trio.py and cca_ssc.py (same samples, characteristics and adjustment; see those scripts' docstrings) and writes the same output names.
+"""Canonical correlation analyses for the Matters Arising, with fully held-out evaluation (ccalib.py). Samples, characteristics and
+covariate adjustment are defined below (one configuration per run; see cca2_configs.cfg).
 
 env ANALYSIS = full | trio | ssc
   full: SUBSET (u22 | all | zhangu22 | p0 | p1 | p2 | p0u22 | src_<source> ...), PARTIAL ("" | source | source_family), WITHIN (1 = pTDT differences),

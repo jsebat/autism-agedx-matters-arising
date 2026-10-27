@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Extended Data figure: the strongest axes linking characteristics of autistic people to their genetics (regularized CCA), FULL data
 , main sample = registered before 22 (Zhang et al.'s criterion), genotyping platform (+ sequencing cohort) and family structure
-regressed out. (a) Out-of-sample canonical correlation per axis vs permutation null: polygenic scores between families (cca_full.py), within
-families (pTDT), and polygenic + rare variants in trio probands (cca_trio.py). (b) Structure coefficients of the four axes of the combined
+regressed out. (a) Out-of-sample canonical correlation per axis vs permutation null: polygenic scores between families (cca2.py, ANALYSIS=full), within
+families (pTDT), and polygenic + rare variants in trio probands (cca2.py, ANALYSIS=trio). (b) Structure coefficients of the four axes of the combined
 analysis for selected genetic and phenotypic variables; age at diagnosis highlighted.
 Inputs: results/full_data/cca_full_u22_partialfam_*, cca_full_u22_within_partial_*, cca_trio_all_*. Output: Manuscripts/Nature_LTE/figures/L_CCA.(png|pdf)"""
 import os

@@ -15,8 +15,8 @@ from scipy.stats import ttest_1samp
 OUT = os.path.expanduser("~/rvh2/agedx"); H = os.path.expanduser("~/rvh2")
 A = pd.read_parquet(f"{OUT}/full_probands.parquet").drop_duplicates("sample_id")
 PG = ["asd", "adhd_2022", "mdd_2025", "bip_2024", "scz_2022", "edu_2022", "iq_2018", "afb_2018", "height_2022"]
-# SES polygenic score (not one of the nine CCA scores): occupational status (CAMSIS; Akimova et al. 2025), scored by score_occstatus.sbatch on the same
-# genotype sets; each person takes the score from their own source and is standardized within source to non-autistic participants, as for the nine.
+# SES polygenic score (not one of the nine CCA scores): occupational status (CAMSIS; Akimova et al. 2025), scored separately on the same
+# genotype sets and not reported in Supplementary Table 6 (the row is used only if the score files exist); each person takes the score from their own source and is standardized within source to non-autistic participants, as for the nine.
 OCC = "/expanse/projects/sebat1/jsebat/pgs_occstatus"
 if os.path.exists(f"{OCC}/spark_gsa_v1.occstatus.sscore"):
     ids = pd.read_csv("/expanse/projects/sebat1/s3/data/sebat/pgs_results_v2/all_cohorts_with_ped_full.tsv", sep="\t", dtype=str, usecols=["source", "IID", "sample_id"]).drop_duplicates(["source", "IID"])

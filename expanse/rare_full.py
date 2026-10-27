@@ -7,7 +7,7 @@ Probands: legacy SPARK trio probands from the lab's expanded collection (~/rvh2/
 Classes (as before): De novo - NDD genes, De novo - other genes, Inherited - NDD genes, Inherited - other genes; weighted sums of the 24 cells
   with the within-family log-OR weights (pgs_rare_h2_drift_full/results/collider_weights.tsv), standardised to unaffected siblings of the
   same cohort (out_dnm_v3 siblings).
-Splits: SPARK survey codes (spark_survey.tsv) + age at diagnosis thirds, as rare_compare.py; SSC has no survey codes, so SSC probands enter
+Splits: SPARK survey codes (spark_survey.tsv) + age at diagnosis thirds; SSC has no survey codes, so SSC probands enter
   only the CCA. Per split: 4-vector d (high minus low), Wald chi2 (4 df; 2 df de novo; 2 df inherited) from a 1,000-replicate family
   bootstrap, and the paired bootstrap difference in norm vs age at diagnosis.
 Outputs: ~/rvh2/agedx/rare_full_cases.parquet (participant-level, Expanse only), rare_compare_full{_all}.tsv, rare_full_counts.txt (aggregate)"""
@@ -51,7 +51,7 @@ pr("probands by cohort (all / registered before 22):"); pr(pro.groupby("cohort")
 if not os.environ.get("ADJ"): pro.to_parquet(f"{OUT}/rare_full_cases.parquet", index=False)   # sensitivity runs never rewrite the shared table
 a = pro[pro.u22].copy() if U22 else pro.copy()
 a = a[~a.cohort.eq("ssc")].reset_index(drop=True)   # splits need SPARK survey codes
-# ---- splits (as rare_compare.py), age-at-diagnosis thirds defined among SPARK autistic registrants of the same age criterion
+# ---- splits, age-at-diagnosis thirds defined among SPARK autistic registrants of the same age criterion
 sv = pd.read_csv(f"{P}/spark_survey.tsv", sep="\t").drop_duplicates("subject_sp_id").set_index("subject_sp_id")
 asd = reg.asd.astype(str).str.upper().eq("TRUE") & (pd.to_numeric(reg.age_at_registration_years, errors="coerce").lt(22) if U22 else True)
 dxm = pd.to_numeric(reg.diagnosis_age, errors="coerce").where(asd)

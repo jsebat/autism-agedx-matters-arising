@@ -57,7 +57,7 @@ Numbering follows the manuscript (items numbered by first mention in the main te
 | Supplementary Fig. 4 | What the split halves capture | `letter_figs2.py` | `all_ldsc.sbatch` (external-trait correlations), `gsem_fa_all.sbatch` (rotated factor solution) |
 | Supplementary Fig. 5 | Design differences between the age strata | `letter_figs2.py` | `agedx_strata.py`, `agedx_decomp.py`, `pcproj_eval.py` |
 
-The manuscript builders (text, table assembly, docx/PDF) are not included; every number they print comes from the aggregate outputs of the scripts above. `score_occstatus.sbatch` scores an occupational-status (SES) polygenic score that is computed but not used in the current manuscript.
+The manuscript builders (text, table assembly, docx/PDF) are not included; every number they print comes from the aggregate outputs of the scripts above. Exploratory analyses that do not feed any manuscript item, including an earlier version of the canonical correlation analysis, are not included.
 
 No copy-number variants are used anywhere in this analysis: every rare-variant result is from coding SNVs and indels (de novo and inherited).
 
@@ -73,11 +73,7 @@ No copy-number variants are used anywhere in this analysis: every rare-variant r
    - Genomic factor analysis on the all-strata split GWAS: `gsem_fa_all.sbatch` (`gsem_fa_all.R`).
 5. **SNP heritability.** `greml.sbatch`, `greml_all.sbatch`, `greml_combine_all.py`.
 6. **Polygenic scores.** `full_probands.py` assembles scores for all subcohorts and records family structure. Autism scores follow the leave-one-out rule: `score_wgs2026_asd.sbatch`.
-7. **Canonical correlation analyses.** Current version: `cca2.py` with the shared module `ccalib.py` (configurations in `cca2_configs.cfg`; `submit_cca2.sh` runs main fits, permutation and bootstrap chunks, then `cca2_combine.sbatch`). Evaluation is fully held out: nested family cross-validation with imputation, covariate adjustment and penalty choice inside the training folds; signed held-out correlations with axes matched across folds; Freedman-Lane family permutations with sequential tests for later axes; family bootstrap of the whole procedure, including paired fold differences between axes and single characteristics. The scripts below are the first version, kept for reference:
-   - `cca_full.py`: polygenic scores; main sample, sensitivity subsets, within-family, power, missingness by family structure.
-   - `cca_trio.py`: polygenic + rare variants.
-   - `cca_ssc.py`: SSC replication.
-   - `SINGLE=1` (`ccasingle.sbatch`, `ccasingle_all.sbatch`, `ccatriosingle.sbatch`): strength of single characteristics, including age at diagnosis, on the same scale as the axes.
+7. **Canonical correlation analyses.** Current version: `cca2.py` with the shared module `ccalib.py` (configurations in `cca2_configs.cfg`; `submit_cca2.sh` runs main fits, permutation and bootstrap chunks, then `cca2_combine.sbatch`). Evaluation is fully held out: nested family cross-validation with imputation, covariate adjustment and penalty choice inside the training folds; signed held-out correlations with axes matched across folds; Freedman-Lane family permutations with sequential tests for later axes; family bootstrap of the whole procedure, including paired fold differences between axes and single characteristics. `ANALYSIS=full` fits polygenic scores (main sample, sensitivity subsets, within-family, power, missingness by family structure), `ANALYSIS=trio` polygenic scores plus rare variants, `ANALYSIS=ssc` the SSC replication; unless `NOSINGLE=1`, a run also measures the strength of single characteristics, including age at diagnosis, on the same scale as the axes.
 8. **Rare variants.** `build_trio_rare.py` (de novo / inherited × NDD / other genes, SNV/indel), then `rare_full.py` (split comparison) and `rare_between_full.py` (probands vs siblings, parental age).
 9. **Within-family transmission.** `ptdt_full.py`.
 10. **Factor analysis and figures.** `figures_and_analysis/`.
