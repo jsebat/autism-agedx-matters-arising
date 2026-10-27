@@ -8,7 +8,22 @@ Aggregate output only: ~/rvh2/agedx/wgsnew_pgs_check.txt"""
 import os, io, glob, re
 import pandas as pd
 buf = io.StringIO(); pr = lambda *x: print(*x, file=buf, flush=True)
-src = open(os.path.expanduser("~/rvh2/rare_survey.py")).read(); exec(src[src.index("TI = "):src.index("def excess")])
+# rare-variant tier definitions (SNV/indel), as in the lab's exploratory rare_survey.py
+TI = ["lof_t1", "lof_t2", "miss_t1", "miss_t2", "miss_t3", "miss_t4"]
+cell = lambda tiers, modes, sets: [f"{t}__{m}__{g}" for t in tiers for m in modes for g in sets]
+CAT = {"de novo, NDD genes": cell(TI, ["dnm"], ["ndd"]), "de novo, other genes": cell(TI, ["dnm"], ["nonndd"]),
+       "de novo LoF": cell(["lof_t1", "lof_t2"], ["dnm"], ["ndd", "nonndd"]), "de novo missense": cell(TI[2:], ["dnm"], ["ndd", "nonndd"]),
+       "inherited, NDD genes": cell(TI, ["inh"], ["ndd"]), "inherited, other genes": cell(TI, ["inh"], ["nonndd"]),
+       "inherited LoF tier 1": cell(["lof_t1"], ["inh"], ["ndd", "nonndd"]), "inherited missense": cell(TI[2:], ["inh"], ["ndd", "nonndd"]),
+       "all rare SNV/indel": cell(TI, ["dnm", "inh"], ["ndd", "nonndd"])}
+def load(root, cats):
+    a = pd.read_parquet(f"/expanse/projects/sebat1/jsebat/{root}/assembled_children.parquet"); a = a[a.cohort.str.startswith("spark")].copy()
+    W = pd.read_csv(f"/expanse/projects/sebat1/jsebat/{root}/results/collider_weights.tsv", sep="\t", index_col=0).iloc[:, 0]
+    for k, ts in cats.items():
+        ts = [t for t in ts if t in a.columns and t in W.index]
+        a[k] = (a[ts].fillna(0).to_numpy(float) * W[ts].to_numpy()).sum(1)
+        ref = a[a.case.eq(0)].groupby("cohort")[k].agg(["mean", "std"]); a[k] = (a[k] - a.cohort.map(ref["mean"])) / a.cohort.map(ref["std"])
+    return a
 a = load("pgs_rare_h2_drift_full", {"x": CAT["de novo, NDD genes"]})
 for c, g in a.groupby("cohort"): pr(f"rare table {c}: n={len(g)}; example sample IDs {list(g['sample'].astype(str).head(3))}; family_key {list(g.family_key.astype(str).head(2))}")
 d = pd.read_csv("/expanse/projects/sebat1/s3/data/sebat/pgs_results_v2/all_cohorts_with_ped_full.tsv", sep="\t", dtype=str, usecols=lambda c: c in ("source", "sample_id", "FID", "IID", "predicted_ancestry", "case_status", "edu_2022"))

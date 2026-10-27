@@ -59,6 +59,8 @@ Numbering follows the manuscript (items numbered by first mention in the main te
 
 The manuscript builders (text, table assembly, docx/PDF) are not included; every number they print comes from the aggregate outputs of the scripts above. `score_occstatus.sbatch` scores an occupational-status (SES) polygenic score that is computed but not used in the current manuscript.
 
+No copy-number variants are used anywhere in this analysis: every rare-variant result is from coding SNVs and indels (de novo and inherited).
+
 
 ## Pipeline (in order)
 
