@@ -86,7 +86,7 @@ vP = ((gP["adhd_2022"] + gP["mdd_2025"]) / 2, (gP["afb_2018"] + gP["edu_2022"]) 
 if vP[0] < 0: vP = (-vP[0], -vP[1])
 axisline(a, vP, float(np.hypot(*V[V.code == "s27"][["d_psych", "d_repro"]].iloc[0])), "PSYCH", ha="left", dx=0.01, dy=-0.06, back=0.0, color="#8c510a")
 a.set_xlabel("psychiatric signal\n(difference in rg with ADHD and MDD)"); a.set_ylabel("EDU/SES signal (difference in rg with\nage at first birth and educational attainment)")
-a.set_title("a  EDU/SES is a major polygenic axis;\n    AADx is secondary", loc="left", fontweight="bold", fontsize=7.2)
+a.set_title("a  EDU/SES is a major polygenic axis;\n    AADx is a minor one", loc="left", fontweight="bold", fontsize=7.2)
 a.grid(color=GRID, lw=0.4); a.set_axisbelow(True)
 
 # (b) rare variants
