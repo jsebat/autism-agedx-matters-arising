@@ -86,7 +86,7 @@ Paths in the scripts point to the authors' cluster storage. Adapt them to your o
 
 - **SPARK and the Simons Simplex Collection** genotypes, sequence data and phenotypes: from SFARI Base, by application.
 - **Published factor GWAS** of Zhang, Grove et al.: figshare, doi:10.6084/m9.figshare.29566052.
-- **Public GWAS summary statistics** for the polygenic scores: listed with references in the manuscript's Supplementary Table 5.
+- **Public GWAS summary statistics** for the polygenic scores: listed with references in the manuscript's Supplementary Table 3.
 - **Autism polygenic scores** use pre-publication leave-one-out summary statistics from the PGC Autism Working Group. These are available from the working group, not from this repository.
 
 ## Software
